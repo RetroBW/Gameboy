@@ -34,16 +34,11 @@ void update_input(void) {
     joypadCurrent = joypad();
 }
 
-
-
 void draw_splash(void) {
     set_bkg_data(0, Splash_TILE_COUNT, Splash_tiles);
     set_bkg_tiles(0, 0, Splash_WIDTH / 8, Splash_HEIGHT / 8, Splash_map);
     SHOW_BKG;
 }
-
-
-
 
 void draw_grid(void) {
     // Draw grid border
@@ -106,7 +101,7 @@ int get_empty_count(void) {
     return iCount;
 }
 
-void get_next(void) {
+bool get_next(void) {
     int empty_count = get_empty_count();
     if (empty_count > 0) {
         uint16_t rand_val = get_pseudo_rand() % empty_count;
@@ -121,6 +116,11 @@ void get_next(void) {
                 }
             }
         }
+        return true;
+    }
+    else {
+        bGameActive = false;
+        return false;
     }
 }
 
@@ -314,29 +314,37 @@ void main(void) {
             if(is_joypad_pressed(J_UP)) {
                 // Handle UP button press
                 if(shift_up()) {
-                    get_next();
-                    draw_cells();
+                    if(get_next()) draw_cells();
+                }
+                else {
+                    bGameActive = get_empty_count() != 0;
                 }
             }
             if(is_joypad_pressed(J_DOWN)) {
                 // Handle DOWN button press
                 if(shift_down()) {
-                    get_next();
-                    draw_cells();
+                    if(get_next()) draw_cells();
+                }
+                else {
+                    bGameActive = get_empty_count() != 0;
                 }
             }
             if(is_joypad_pressed(J_LEFT)) {
                 // Handle LEFT button press
                 if(shift_left()) {
-                    get_next();
-                    draw_cells();
+                    if(get_next()) draw_cells();
+                }
+                else {
+                    bGameActive = get_empty_count() != 0;
                 }
             }
             if(is_joypad_pressed(J_RIGHT)) {
                 // Handle RIGHT button press
                 if(shift_right()) {
-                    get_next();
-                    draw_cells();
+                    if(get_next()) draw_cells();
+                }
+                else {
+                    bGameActive = get_empty_count() != 0;
                 }
             }
         }
@@ -344,8 +352,11 @@ void main(void) {
             if(is_joypad_pressed(J_START)) {
                 // Handle START button press
                 bGameActive = true;
-                //clear the screen
-                fill_bkg_rect(0, 0, 20, 18, 0);
+                for(int y = 0; y < 4; y++) {
+                    for(int x = 0; x < 4; x++) {
+                        contents[y][x] = 0;
+                    }
+                }
                 // Draw the grid
                 draw_grid();
                 // Initialize the grid with a random cell
